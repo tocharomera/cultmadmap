@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <title>CultMadMap
   </title>
-   
+
   <script src="https://leaflet.github.io/Leaflet.draw/docs/examples/libs/leaflet-src.js"></script>
   <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.draw/docs/examples/libs/leaflet.css" />
   <link rel="stylesheet" href="http://labs.easyblog.it/maps/leaflet-search/src/leaflet-search.css" />
@@ -51,7 +51,7 @@
     //var coord = document.body.getAttribute("data-coordinates");
 
     socket.emit('join', {
-      userId: userId
+      userId: socket.id
     });
 
     var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -134,7 +134,7 @@
           var newmarker = datasplit[0] + location
           console.log(newmarker)
           socket.emit("savemarker", newmarker)
-
+          marker.closePopup();
         });
         $(".marker-delete-button:visible").click(function() {
           map.removeLayer(tempMarker);
@@ -230,6 +230,7 @@
         }
       });
     });
+
   </script>
 </body>
 

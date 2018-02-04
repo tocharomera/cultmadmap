@@ -45,67 +45,64 @@ server.listen(portNumber, function() { //Runs the server on port 8000
     }
   });
   var place = mongoose.model("place", placeSchema, "markers");
-
+  var userId
   var db = mongoose.connection;
   db.on('error', console.error.bind(console, 'connection error:'));
   db.once('open', function() { //a connection with the mongodb is established here.
     console.log("Connected to Database");
-     var code = 01
+    var code = 01
     app.get('/', function(req, res) {
-      io.on('connection', function(socket) { //Listen on the 'connection' event for incoming sockets
-        console.log('A user just connected');
-        socket.on('join', function(data) { //Listen to any join event from connected users
-          socket.join(data.userId); //User joins a unique room/channel that's named after the userId
-          console.log("User joined room: " + data.userId);
+
+      res.render('index.html', {
+        code: code
+      });
+    });
+    io.on('connection', function(socket) { //Listen on the 'connection' event for incoming sockets
+      console.log('A user just connected'+ socket.id);
+
+
+      socket.on('join', function(data) {
+         userId = data //Listen to any join event from connected users
+        socket.join(userId); //User joins a unique room/channel that's named after the userId
+        console.log("User joined " + "map");
+      });
+
+      //console.log(db.collection("markers").count())
+      db.collection("markers").find({}, {}, function(err, docs) {
+        docs.each(function(err, doc) {
+          if (doc) {
+            code = doc
+            socket.emit("newmarker", code)
+          }
         });
+      });
+      socket.on("savemarker", function(newmarker) {
 
-        //console.log(db.collection("markers").count())
-        db.collection("markers").find({}, {}, function(err, docs) {
-          docs.each(function(err, doc) {
-            if (doc) {
-              code = doc
-              socket.emit("newmarker", code)
-            }
-          });
-        });
-        socket.on("savemarker", function(newmarker) {
-          console.log("times");
-          var data = JSON.parse(newmarker)
-
-          var newPlace = new place({
-            "type": data.type,
-            "name": data.name,
-            "description": data.description,
-            "phone": data.phone,
-            "email": data.email,
-            "address": data.address,
-            "location": data.location
-          })
-
-          newPlace.save(function(error) {
-
-            if (error) {
-              console.error(error);
-            }
-          })
+        var data = JSON.parse(newmarker)
+        console.log("Saving "+data.name);
+        var newPlace = new place({
+          "type": data.type,
+          "name": data.name,
+          "description": data.description,
+          "phone": data.phone,
+          "email": data.email,
+          "address": data.address,
+          "location": data.location
         })
 
-        socket.on('leave', function(data) { //Listen to any join event from connected users
-          socket.leave(data.userId); //User joins a unique room/channel that's named after the userId
-          console.log("User left room: " + data.userId);
-        });
+        newPlace.save(function(error) {
+          if (error) {
+            console.error(error);
+          }
+        })
+        socket.emit("newmarker", data)
+      })
+      socket.on('disconnect', function() {
+        socket.leave(userId);
+        console.log('user left' +socket.id);
       });
-      res.render('index.html', {
-
-        code: code
-
-      });
-
     });
-
-
   });
 });
-
 /* 1. Not all the template engines work uniformly with express, hence this library in js, (consolidate), is used to make the template engines work uniformly. Altough it doesn't have any
 modules of its own and any template engine to be used should be seprately installed!*/
