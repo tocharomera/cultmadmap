@@ -3,11 +3,9 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Cop
-    <%= userId %>
+  <title>CultMadMap
   </title>
-  <title>Leaflet.draw popup event example</title>
-
+   
   <script src="https://leaflet.github.io/Leaflet.draw/docs/examples/libs/leaflet-src.js"></script>
   <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.draw/docs/examples/libs/leaflet.css" />
   <link rel="stylesheet" href="http://labs.easyblog.it/maps/leaflet-search/src/leaflet-search.css" />
@@ -15,17 +13,14 @@
   <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.draw/src/leaflet.draw.css" />
   <script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.draw.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.Draw.Event.js"></script>
-
   <script src="https://leaflet.github.io/Leaflet.draw/src/Toolbar.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/Tooltip.js"></script>
-
   <script src="https://leaflet.github.io/Leaflet.draw/src/ext/GeometryUtil.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/ext/LatLngUtil.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/ext/LineUtil.Intersect.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polygon.Intersect.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polyline.Intersect.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/ext/TouchEvents.js"></script>
-
   <script src="https://leaflet.github.io/Leaflet.draw/src/draw/DrawToolbar.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Feature.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.SimpleShape.js"></script>
@@ -35,31 +30,19 @@
   <script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Circle.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polygon.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Rectangle.js"></script>
-
-
   <script src="https://leaflet.github.io/Leaflet.draw/src/edit/EditToolbar.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Edit.js"></script>
   <script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Delete.js"></script>
-
   <script src="https://leaflet.github.io/Leaflet.draw/src/Control.Draw.js"></script>
-
-
   <script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Marker.js"></script>
-
-
   <script src="/socket.io/socket.io.js"></script>
-
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-
 </head>
 
-<body data-userId="<%= userId %>" data-coordinates="<%= coord %>">
+<body data-userId="<%= code %>" data-coordinates="<%= code.location %>">
   <h1>cultMadMap
-        <%= userId %>
-        <%= coord %>
     </h1>
-  <h2>Cul: </h2>
-  <div id="copDetails"></div>
+
   <div id='map' style='width: 600px; height: 400px;'></div>
   <script type="text/javascript">
     var socket = io();
@@ -70,14 +53,7 @@
     socket.emit('join', {
       userId: userId
     });
-    socket.on("newmarker", function(data) {
-      console.log(data.coordinates);
-      var coord = data.coordinates.split(",");
-      console.log(coord); //create an array containing lat and lng as strings
-      coord[0] = parseFloat(coord[0]); //convert lat string to number
-      coord[1] = parseFloat(coord[1]); //convert lng string to number
-      var marker = L.marker(coord).addTo(map);
-    })
+
     var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       osm = L.tileLayer(osmUrl, {
@@ -126,50 +102,72 @@
 
       // Function to handle delete as well as other events on marker popup open
       function onPopupOpen() { //funciones del marcador
-
-
+        var data;
         var tempMarker = this;
         $(".form").submit(function(e) {
           e.preventDefault();
-          console.log("didnt submit");
-          var date = $("#name").val();
-          console.log(date);
+          var form = document.getElementsByClassName("form");
+          console.log(form[0]);
+          data = toJSONString(form[0]);
+
+          function toJSONString(form) {
+            var obj = {};
+            var elements = form.querySelectorAll("input");
+            for (var i = 0; i < elements.length; ++i) {
+              var element = elements[i];
+              var name = element.name;
+              var value = element.value;
+              if (name) {
+                obj[name] = value;
+              }
+            }
+            return JSON.stringify(obj);
+          }
+
+          var coord = String(marker.getLatLng()).split(',');
+          var lat = coord[0].split('(');
+          var lng = coord[1].split(')');
+          coordinates = [lat[1], lng[0]]
+          console.log(coordinates[0])
+          var location = "," + '"location" : {"type" :  "Point" ,  "coordinates"  : ['+ String(coordinates[0])+","+String(coordinates[1])+ '] }}';
+          var datasplit = data.split('}')
+          var newmarker = datasplit[0] + location
+          console.log(newmarker)
+          socket.emit("savemarker", newmarker)
 
         });
-
         $(".marker-delete-button:visible").click(function() {
           map.removeLayer(tempMarker);
-
         });
+
       }
-
-
       L.geoJson(geojsonFeature, {
-
         pointToLayer: function(feature, latlng) {
-
           marker = L.marker(e.latlng, {
-
             title: "Resource Location",
             alt: "Resource Location",
             riseOnHover: true,
             draggable: true,
-
-          }).bindPopup("<form class='form'>name: <input id='name' type='text' name='name'><br>Descrition: <input id='description' type='text' name='description'><br>Address: <input type='text' name='address'>" +
-            "<input type='button' value='Cancel' class='marker-delete-button'/>" +
-            "<button type='submit' value='Save'>Save</button>")
-
-
-
+          }).bindPopup(
+            "<form class='form' enctype='application/json'>" +
+            "type: <input id='type' type='text' name='type'>" +
+            "<br>name: <input id='name' type='text' name='name'>" +
+            "<br>Descrition: <input id='description' type='text' name='description'>" +
+            "<br>phone: <input id='phone' type='text' name='phone'>" +
+            "<br>e-mail: <input id='email' type='text' name='email'>" +
+            "<br>Address: <input type='text' name='address'>" +
+            "<br><button type='reset' class='marker-delete-button'>Cancel</button>" +
+            "<button id='submit' type='submit' value='Save'>Save</button>")
           marker.on("popupopen", onPopupOpen);
-
           return marker;
         }
       }).addTo(map);
-
-
     }
-
+    socket.on("newmarker", function(data) {
+      //convert lng string to number
+      var marker = L.marker(data.location.coordinates).bindPopup(data.name).addTo(map);
+      drawnItems.addLayer(marker);
+    })
     map.addControl(new L.Control.Draw({
       edit: {
         featureGroup: drawnItems,

@@ -1,0 +1,46 @@
+
+{
+    "type" : "workshop",
+    "name" : "Espacio Matrioska",
+    "description" : "agua",
+    "phone" : "01",
+    "email" : "cop01@gmail.com",
+    "address" : "SS Environs, Chellikere, 1st block, Chelekare, Kalyan Nagar, Bengaluru, Karnataka 560043, India",
+    "location" : {
+        "type" : "Point",
+        "coordinates" : [
+            40.4157,
+            -3.7101
+        ]
+    }
+}
+{
+    "type" : "csa",
+    "name" : "Tabacalera",
+    "description" : "agua",
+    "phone" : "01",
+    "email" : "cop01@gmail.com",
+    "location" : {
+        "type" : "Point",
+        "address" : "SS Environs, Chellikere, 1st block, Chelekare, Kalyan Nagar, Bengaluru, Karnataka 560043, India",
+        "coordinates" : [
+            40.4057,
+            -3.7001
+        ]
+    }
+}
+{
+    "type" : "museum",
+    "name" : "Reina Sofia",
+    "description" : "agua",
+    "phone" : "01",
+    "email" : "cop01@gmail.com",
+    "location" : {
+        "type" : "Point",
+        "address" : "SS Environs, Chellikere, 1st block, Chelekare, Kalyan Nagar, Bengaluru, Karnataka 560043, India",
+        "coordinates" : [
+            40.9257,
+            -3.6101
+        ]
+    }
+}
