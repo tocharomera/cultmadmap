@@ -135,6 +135,7 @@
           console.log(newmarker)
           socket.emit("savemarker", newmarker)
           marker.closePopup();
+          map.removeLayer(tempMarker);
         });
         $(".marker-delete-button:visible").click(function() {
           map.removeLayer(tempMarker);
